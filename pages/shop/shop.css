@@ -1,0 +1,16 @@
+.product{
+    width: 400px;
+    text-align: center;
+
+}
+
+.product img{
+    width: 400px;
+}
+
+.products{
+    width:100%;
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
