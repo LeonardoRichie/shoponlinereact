@@ -6,21 +6,26 @@ import { Cart } from './pages/cart/cart';
 import { Shop } from './pages/shop/shop';
 import { Setting } from './pages/setting/setting';
 import { Description } from './pages/shop/description';
+import { History } from './pages/history/history';
+import { ShopContextProvider } from './context/shop-context';
 
 function App() {
   return (
     <div className="App">
-      <Router>
-        <Navbar />
-        <Routes>
-          <Route>
-            <Route path="/" element={<Shop />} />
-            <Route path="/description/:id" element={<Description />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path= "/setting" element={<Setting />}/>
-          </Route>
-        </Routes>
-      </Router>
+      <ShopContextProvider>
+        <Router>
+          <Navbar />
+          <Routes>
+            <Route>
+              <Route path="/" element={<Shop />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/description/:id" element={<Description />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path= "/setting" element={<Setting />}/>
+            </Route>
+          </Routes>
+        </Router>
+      </ShopContextProvider>
     </div>
   );
 }

@@ -12,7 +12,7 @@ export const Description = () => {
     <div className="shop">
       <div>
         <div className="shopTitle">
-          <h1>Shop</h1>
+          <h1>Description</h1>
           <Link to="/">
             <button>back</button>
           </Link>
