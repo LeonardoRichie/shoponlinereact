@@ -10,42 +10,42 @@ import product8 from './assets/8.webp'
 export const PRODUCTS = [
     {
         id: 1,
-        productName: 'IPhone',
+        productName: 'IPhone 14',
         price: 999.0,
         productImage: product1,
         description: 'made in china'
     },
     {
         id: 2,
-        productName: 'IPhone',
+        productName: 'IPhone 14 Pro',
         price: 999.0,
         productImage: product2,
         description: 'made in china'
     },
     {
         id: 3,
-        productName: 'IPhone',
+        productName: 'IPhone 14 Pro Max',
         price: 999.0,
         productImage: product3,
         description: 'made in china'
     },
     {
         id: 4,
-        productName: 'IPhone',
+        productName: 'IPhone 15',
         price: 999.0,
         productImage: product4,
         description: 'made in china'
     },
     {
         id: 5,
-        productName: 'IPhone',
+        productName: 'IPhone 15 Pro',
         price: 999.0,
         productImage: product5,
         description: 'made in china'
     },
     {
         id: 6,
-        productName: 'IPhone',
+        productName: 'IPhone 15 Pro Max',
         price: 999.0,
         productImage: product6,
         description: 'made in china'

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import "./cart.css"
 
 export const Cart = () => {
-  const {cartItems, getTotalCartAmount} = useContext(ShopContext);
+  const {cartItems, getTotalCartAmount, checkout} = useContext(ShopContext);
   const totalAmount = getTotalCartAmount()
 
   const navigate = useNavigate()
@@ -16,7 +16,7 @@ export const Cart = () => {
         </div>
         <div className="cartItems">
           {PRODUCTS.map((product)=>{
-              if (cartItems[product.id] != 0){
+              if (cartItems[product.id] !== 0){
                 return <CartItem data={product} />
               }
           })}
@@ -25,7 +25,15 @@ export const Cart = () => {
           <div className = "checkout">
             <p> SubTotal: ${totalAmount}</p>
             <button onClick={() => navigate ("/")}> Continue Shopping</button>
-            <button> Checkout</button>
+            <button
+            onClick={() => {
+              checkout();
+              navigate("/checkout");
+            }}
+          >
+            {" "}
+            Checkout{" "}
+          </button>
           </div>
         ):(<h1>Your Cart is Empty</h1>
         )}

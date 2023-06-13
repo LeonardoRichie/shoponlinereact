@@ -8,6 +8,7 @@ import { Setting } from './pages/setting/setting';
 import { Description } from './pages/shop/description';
 import { History } from './pages/history/history';
 import { ShopContextProvider } from './context/shop-context';
+import { Checkout } from './pages/checkout/checkout';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
               <Route path="/history" element={<History />} />
               <Route path="/description/:id" element={<Description />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path= "/checkout" element={<Checkout />} />
               <Route path= "/setting" element={<Setting />}/>
             </Route>
           </Routes>
