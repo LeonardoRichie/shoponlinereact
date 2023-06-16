@@ -64,4 +64,5 @@ export const PRODUCTS = [
         productImage: product8,
         description: ' a term used for a brand of Mac notebook computers that Apple started producing in 2006. The American multinational corporation created MacBook computers when it consolidated its PowerBook and iBook lines during its transition to Intel processor-based products. As of 2013, there are two types of MacBook computers: the base-level MacBook Air and the upper-level MacBook Pro.'
     },
+    
 ]
