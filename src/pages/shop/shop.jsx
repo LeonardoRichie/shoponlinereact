@@ -24,7 +24,7 @@ export const Shop = () => {
     <div className="shop">
       <div>
         <div className="shopTitle">
-          <h1>Shop</h1>
+          <h1>.Sagara</h1>
         </div>
         <div className="products">
           
