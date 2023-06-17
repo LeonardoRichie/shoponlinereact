@@ -21,7 +21,7 @@ export const Descriptionproduct = (props) => {
 
   return (
     <div className="product">
-      <img src={imageURL} />
+      <img src={imageURL} alt={productName} />
       <div className="description">
         <p>
           <b>{productName}</b>

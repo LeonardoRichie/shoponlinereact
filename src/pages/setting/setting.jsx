@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export const Setting = () => {
   const [loginEmail, setLoginEmail] = useState('');
@@ -6,7 +7,8 @@ export const Setting = () => {
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
-  const [users, setUsers] = useState([]);
+  const [signupAddress, setSignupAddress] = useState('');
+  const [signupTelephone, setSignupTelephone] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Check if the user is logged in on component mount
@@ -17,20 +19,22 @@ export const Setting = () => {
     }
   }, []);
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    // Find the user with matching email and password in the array
-    const loginUser = users.find(
-      (user) => user.email === loginEmail && user.password === loginPassword
-    );
+    try {
+      const email = loginEmail.toLowerCase(); // Convert email to lowercase
+      // Send a POST request to the login endpoint
+      const response = await axios.post('http://localhost:8000/login', {
+        email,
+        password: loginPassword,
+      });
 
-    if (loginUser) {
-      // User found, perform login logic
+      // User login successful, update state and save user data in local storage
       setIsLoggedIn(true);
-      localStorage.setItem('user', JSON.stringify(loginUser));
-    } else {
-      // User not found, display error message or perform appropriate action
+      localStorage.setItem('user', JSON.stringify(response.data));
+    } catch (error) {
+      // User login failed, display error message or perform appropriate action
       console.log('Invalid email or password');
     }
   };
@@ -42,24 +46,32 @@ export const Setting = () => {
     setLoginPassword('');
   };
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
-    // Create a new user object
-    const newUser = {
-      name: signupName,
-      email: signupEmail,
-      password: signupPassword,
-    };
 
-    // Add the new user to the array
-    setUsers([...users, newUser]);
+    try {
+      const email = signupEmail.toLowerCase(); // Convert email to lowercase
+      // Send a POST request to the signup endpoint
+      await axios.post('http://localhost:8000/signup', {
+        name: signupName,
+        email,
+        password: signupPassword,
+        address: signupAddress,
+        telephone: signupTelephone,
+      });
 
-    // Clear the signup form fields
-    setSignupName('');
-    setSignupEmail('');
-    setSignupPassword('');
+      // User signup successful, clear the signup form fields
+      setSignupName('');
+      setSignupEmail('');
+      setSignupPassword('');
+      setSignupAddress('');
+      setSignupTelephone('');
 
-    console.log('Signup submitted');
+      console.log('Signup submitted');
+    } catch (error) {
+      // User signup failed, display error message or perform appropriate action
+      console.log('Error signing up');
+    }
   };
 
   if (isLoggedIn) {
@@ -119,6 +131,22 @@ export const Setting = () => {
               type="password"
               value={signupPassword}
               onChange={(e) => setSignupPassword(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Address:</label>
+            <input
+              type="text"
+              value={signupAddress}
+              onChange={(e) => setSignupAddress(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Telephone:</label>
+            <input
+              type="text"
+              value={signupTelephone}
+              onChange={(e) => setSignupTelephone(e.target.value)}
             />
           </div>
           <button type="submit">Signup</button>
