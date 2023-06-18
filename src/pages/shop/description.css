@@ -1,0 +1,31 @@
+.shop {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.shopTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.shopTitle h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.products {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.product img {
+    width: 300px; 
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
