@@ -140,7 +140,7 @@ class UserLoginRequest(BaseModel):
 @app.post("/signup")
 def signup(user_data: UserSignupRequest):
     # Check if user with the same email already exists
-    existing_user = next((user for user in users if usemaier["l"] == user_data.email), None)
+    existing_user = next((user for user in users if user["email"] == user_data.email), None)
     if existing_user:
         raise HTTPException(status_code=400, detail="User with this email already exists")
 
