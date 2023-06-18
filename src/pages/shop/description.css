@@ -1,8 +1,7 @@
-.shop {
+.shop{
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
 .shopTitle {
@@ -13,19 +12,22 @@
 }
 
 .shopTitle h1 {
-    font-size: 24px;
+    font-size: 50px;
     margin: 0;
 }
-
-.products {
+.product {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin: 20px;
+    width: 250px;
+    height: auto; 
 }
 
 .product img {
-    width: 300px; 
-    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
     margin-bottom: 10px;
 }
