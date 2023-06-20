@@ -119,11 +119,11 @@ export const Cart = () => {
         method: 'DELETE',
       });
       setCartData([]); // Clear the cart data
+      navigate('/checkout'); // Navigate to the checkout page
     } catch (error) {
       console.error('Error clearing cart:', error);
     }
   };
-
   return (
     <div className="cart">
       <div>

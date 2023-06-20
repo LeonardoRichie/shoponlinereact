@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pathlib import Path
 from datetime import datetime, timedelta
+
 import sqlite3
 from sqlite3 import Error
 from passlib.context import CryptContext
@@ -28,83 +29,133 @@ def get_db_connection():
     conn = sqlite3.connect("productstorage.db")
     return conn
 
-class UserSignup(BaseModel):
+# to get a string like this run:
+# openssl rand -hex 32
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+fake_users_db = {
+    "johndoe": {
+        "username": "johndoe",
+        "full_name": "John Doe",
+        "email": "johndoe@example.com",
+        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "disabled": False,
+    }
+}
+
+
+
+# User model
+class User(BaseModel):
+    id: int
     name: str
     email: str
     password: str
     address: str
     telephone: str
 
-class UserLogin(BaseModel):
+# Pydantic model for user signup request
+class UserSignupRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    address: str
+    telephone: str
+
+# Pydantic model for user login request
+class UserLoginRequest(BaseModel):
     email: str
     password: str
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# OAuth2 password bearer for token authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
-def generate_token(user_id: int) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    expire = expire.replace(microsecond=0)
-    payload = {
-        "user_id": user_id,
-        "exp": expire,
-        "iat": datetime.utcnow(),
-    }
-    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-    return token
+# Hash the password
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
 
-@app.post("/signup")
-def signup(user: UserSignup, conn: sqlite3.Connection = Depends(get_db_connection)):
+# Verify the password
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+# Get a user by email
+def get_user_by_email(email: str, conn: sqlite3.Connection):
     cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    record = cursor.fetchone()
+    cursor.close()
 
-    # Check if the user already exists
-    cursor.execute("SELECT * FROM users WHERE email = ?", (user.email,))
-    existing_user = cursor.fetchone()
+    if record:
+        user = User(id=record[0], name=record[1], email=record[2], password=record[3], address=record[4], telephone=record[5])
+        return user
 
-    if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
-
-    # Insert the new user into the users table
+# Create a new user
+def create_user(user: UserSignupRequest, conn: sqlite3.Connection):
+    cursor = conn.cursor()
+    hashed_password = get_password_hash(user.password)
     cursor.execute(
         "INSERT INTO users (name, email, password, address, telephone) VALUES (?, ?, ?, ?, ?)",
-        (user.name, user.email, user.password, user.address, user.telephone),
+        (user.name, user.email, hashed_password, user.address, user.telephone)
     )
     conn.commit()
     cursor.close()
 
+# Generate an access token
+def create_access_token(data: dict, expires_delta: timedelta):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+# Signup route
+@app.post("/signup")
+async def signup(user: UserSignupRequest, conn: sqlite3.Connection = Depends(get_db_connection)):
+    
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (user.email,))
+    record = cursor.fetchone()
+    cursor.close()
+
+    if record:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    create_user(user, conn)
     return {"message": "User created successfully"}
 
-
+# Login route
 @app.post("/login")
-def login(user: UserLogin, conn: sqlite3.Connection = Depends(get_db_connection)):
-    cursor = conn.cursor()
+async def login(user: UserLoginRequest, conn: sqlite3.Connection = Depends(get_db_connection)):
+    
+    db_user = get_user_by_email(user.email, conn)
 
-    # Check if the user exists and verify the password
-    cursor.execute("SELECT * FROM users WHERE email = ?", (user.email,))
-    existing_user = cursor.fetchone()
+    if not db_user:
+        raise HTTPException(status_code=400, detail="Invalid email or password")
 
-    if existing_user:
-        user_id, name, email, password, address, telephone = existing_user
-        if user.password == password:
-            # Generate a JWT token for authentication
-            token = generate_token(user_id)
-            return {"access_token": token, "token_type": "bearer"}
+    if not verify_password(user.password, db_user.password):
+        raise HTTPException(status_code=400, detail="Invalid email or password")
 
-    raise HTTPException(status_code=401, detail="Invalid email or password")
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": db_user.email},
+        expires_delta=access_token_expires
+    )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+    return {"access_token": access_token, "token_type": "bearer"}
+# Your existing /products route
+class Product(BaseModel):
+    id: int
+    productName: str
+    price: float
+    productImage: str
+    description: str
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("user_id")
-        if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid authentication token")
-        return user_id
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid authentication token")
+app.mount("/assets", StaticFiles(directory=Path("assets")), name="assets")
 
 
 @app.get("/products")

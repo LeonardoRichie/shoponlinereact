@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { PRODUCTS } from '../../products';
-import './history.css'
+import './history.css';
 
 export const History = () => {
   const [history, setHistory] = useState([]);
@@ -20,12 +19,6 @@ export const History = () => {
     fetchHistory();
   }, []);
 
-  const getProductImage = (productId) => {
-    // Replace `PRODUCTS` with your actual array of products
-    const product = PRODUCTS.find((item) => item.id === productId);
-    return product ? product.productImage : '';
-  };
-
   return (
     <div className="history">
       <div>
@@ -35,8 +28,8 @@ export const History = () => {
         <div className="historyList">
           {history.map((item) => (
             <div key={item.id}>
-              <img className="HistoryImage" src={getProductImage(item.id)} alt={item.productName} />
               <div className="historytext">
+                <img className= "historyimage" src={`http://localhost:8000${item.productImage}`} alt={item.productName} />
                 <h2>{item.productName}</h2>
                 <p>Price: {item.price}</p>
                 <p>Quantity: {item.quantity}</p>

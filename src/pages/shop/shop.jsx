@@ -20,16 +20,24 @@ export const Shop = () => {
     fetchProducts();
   }, []);
 
+  const addToCart = async (productId) => {
+    try {
+      await axios.post(`http://localhost:8000/cart/${productId}`);
+      console.log('Product added to cart successfully.');
+    } catch (error) {
+      console.error('Failed to add product to cart:', error);
+    }
+  };
+
   return (
     <div className="shop">
       <div>
         <div className="shopTitle">
-          <h1>Shop</h1>
+          <h1>Shops</h1>
         </div>
         <div className="products">
-          
           {products.map((product) => (
-            <Product key={product.id} data={product} />
+            <Product key={product.id} data={product} addToCart={addToCart} />
           ))}
         </div>
       </div>
