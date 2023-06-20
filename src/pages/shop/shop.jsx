@@ -33,7 +33,11 @@ export const Shop = () => {
     <div className="shop">
       <div>
         <div className="shopTitle">
+<<<<<<< HEAD
           <h1>Shops</h1>
+=======
+          <h1>.Sagara</h1>
+>>>>>>> b8041c450a6a6023faeb9668fdaae1a5242da03a
         </div>
         <div className="products">
           {products.map((product) => (
