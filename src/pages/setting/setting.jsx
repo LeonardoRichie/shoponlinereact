@@ -10,14 +10,7 @@ export const Setting = () => {
   const [signupAddress, setSignupAddress] = useState('');
   const [signupTelephone, setSignupTelephone] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Check if the user is logged in on component mount
-  useEffect(() => {
-    const loggedInUser = localStorage.getItem('user');
-    if (loggedInUser) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  const [userProfile, setUserProfile] = useState(null);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -25,25 +18,39 @@ export const Setting = () => {
     try {
       const email = loginEmail.toLowerCase(); // Convert email to lowercase
       // Send a POST request to the login endpoint
-      const response = await axios.post('http://localhost:8000/login', {
+      await axios.post('http://localhost:8000/login', {
         email,
         password: loginPassword,
       });
 
-      // User login successful, update state and save user data in local storage
+      // User login successful, update state
       setIsLoggedIn(true);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      // Load user profile
+      await loadUserProfile(email);
+
+      // Persist login state in browser storage
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('loginEmail', email);
     } catch (error) {
       // User login failed, display error message or perform appropriate action
       console.log('Invalid email or password');
     }
   };
 
-  const handleSignOut = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem('user');
-    setLoginEmail('');
-    setLoginPassword('');
+  const handleSignOut = async () => {
+    try {
+      setIsLoggedIn(false);
+      setUserProfile(null); // Clear user profile on sign out
+
+      // Clear login state from browser storage
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('loginEmail');
+
+      // Redirect to the login page
+      window.location.replace('/');
+    } catch (error) {
+      console.log('Error signing out');
+    }
   };
 
   const handleSignupSubmit = async (e) => {
@@ -69,17 +76,55 @@ export const Setting = () => {
 
       console.log('Signup submitted');
     } catch (error) {
-      // User signup failed, display error message or perform appropriate action
       console.log('Error signing up');
     }
   };
 
+  const loadUserProfile = async (email) => {
+    try {
+      // Send a GET request to retrieve the user's profile
+      const response = await axios.get(`http://localhost:8000/users/${email}`);
+      const userData = response.data;
+      setUserProfile(userData);
+    } catch (error) {
+      console.log('Error loading user profile');
+    }
+  };
+
+  useEffect(() => {
+    // Check if the user is logged in based on browser storage
+    const storedIsLoggedIn = localStorage.getItem('isLoggedIn');
+    const storedLoginEmail = localStorage.getItem('loginEmail');
+
+    if (storedIsLoggedIn === 'true' && storedLoginEmail) {
+      setIsLoggedIn(true);
+      setLoginEmail(storedLoginEmail);
+      loadUserProfile(storedLoginEmail);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Perform any additional actions after logging in
+    if (isLoggedIn && userProfile) {
+      // Do something with the user's profile data
+      console.log(userProfile);
+    }
+  }, [isLoggedIn, userProfile]);
+
   if (isLoggedIn) {
-    const loggedInUser = JSON.parse(localStorage.getItem('user'));
     return (
       <div>
         <h2>User Profile</h2>
-        <p>Welcome, {loggedInUser.name}!</p>
+        <p>Welcome, {loginEmail}!</p>
+        {/* Render user profile data */}
+        {userProfile && (
+          <div>
+            <p>Name: {userProfile.name}</p>
+            <p>Email: {userProfile.email}</p>
+            <p>Address: {userProfile.address}</p>
+            <p>Telephone: {userProfile.telephone}</p>
+          </div>
+        )}
         <button onClick={handleSignOut}>Sign Out</button>
       </div>
     );
