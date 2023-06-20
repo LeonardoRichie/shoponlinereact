@@ -9,12 +9,10 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import sqlite3
 from sqlite3 import Error
-from passlib.context import CryptContext
+import passlib.context
 from jose import JWTError, jwt
 
-
 app = FastAPI()
-app.mount("/assets", StaticFiles(directory=Path("assets")), name="assets")
 
 # Configure CORS middleware
 app.add_middleware(
@@ -45,6 +43,8 @@ SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+pwd_context = passlib.context.CryptContext(schemes=["bcrypt"], deprecated="auto")
+app.mount("/assets", StaticFiles(directory=Path("assets")), name="assets")
 
 def generate_token(user_id: int) -> str:
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -68,34 +68,35 @@ def signup(user: UserSignup, conn: sqlite3.Connection = Depends(get_db_connectio
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    # Insert the new user into the users table
+    # Hash the password
+    hashed_password = pwd_context.hash(user.password)
+
+    # Insert the new user into the users table with the hashed password
     cursor.execute(
         "INSERT INTO users (name, email, password, address, telephone) VALUES (?, ?, ?, ?, ?)",
-        (user.name, user.email, user.password, user.address, user.telephone),
+        (user.name, user.email, hashed_password, user.address, user.telephone),
     )
     conn.commit()
     cursor.close()
 
     return {"message": "User created successfully"}
 
-
 @app.post("/login")
 def login(user: UserLogin, conn: sqlite3.Connection = Depends(get_db_connection)):
     cursor = conn.cursor()
 
-    # Check if the user exists and verify the password
+    # Check if the user exists
     cursor.execute("SELECT * FROM users WHERE email = ?", (user.email,))
     existing_user = cursor.fetchone()
 
     if existing_user:
-        user_id, name, email, password, address, telephone = existing_user
-        if user.password == password:
+        user_id, name, email, hashed_password, address, telephone = existing_user
+        if pwd_context.verify(user.password, hashed_password):
             # Generate a JWT token for authentication
             token = generate_token(user_id)
             return {"access_token": token, "token_type": "bearer"}
 
     raise HTTPException(status_code=401, detail="Invalid email or password")
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -108,6 +109,27 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
+@app.get("/users/{email}")
+def get_user(email: str, conn: sqlite3.Connection = Depends(get_db_connection)):
+    cursor = conn.cursor()
+
+    # Check if the user exists
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+
+    cursor.close()
+
+    if user:
+        user_id, name, _, _, address, telephone = user
+        return {
+            "id": user_id,
+            "name": name,
+            "email": email,
+            "address": address,
+            "telephone": telephone,
+        }
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
 
 @app.get("/products")
 def get_all_products(conn: sqlite3.Connection = Depends(get_db_connection)):
