@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Descriptionproduct } from './descriptionproduct';
 import { Link, useParams } from 'react-router-dom';
+import './description.css';
 
 export const Description = () => {
   const { id } = useParams();
@@ -25,7 +26,7 @@ export const Description = () => {
         <div className="shopTitle">
           <h1>Description</h1>
           <Link to="/">
-            <button>back</button>
+            <button>Back</button>
           </Link>
         </div>
         <div className="products">

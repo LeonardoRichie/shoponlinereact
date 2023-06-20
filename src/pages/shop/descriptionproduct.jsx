@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { ShopContext } from '../../context/shop-context';
+import './descriptionproduct.css';
 
 export const Descriptionproduct = (props) => {
   const { id } = props.data;
