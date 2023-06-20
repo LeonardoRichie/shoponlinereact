@@ -1,10 +1,49 @@
+.history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.historyTitle {
+  text-align: center;
+  margin-bottom: 20px;
+  color: crimson;
+}
+
+.historyList {
+  width: 100%;
+}
+
+.historytext {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  text-align: center;
+}
+
 .historyimage {
-    width: 100px; /* Set the desired width */
-    height: auto; /* Maintain the aspect ratio */
-  }
-  
-.historyList{
-    width:100%;
-    height: auto;
-    display: grid;
+  width: 100%;
+  max-height: 200px;
+  display: block;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.historytext h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.historytext p {
+  font-size: 14px;
+  color: brown;
+  margin-bottom: 5px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 20px 0;
 }
