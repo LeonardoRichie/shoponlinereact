@@ -18,11 +18,13 @@
   
   .cartItem img {
     width: 200px;
+    height: 200px; /* Add a specific height to maintain aspect ratio */
+    object-fit: cover; /* Maintain aspect ratio and fill the container */
+    margin-right: 30px; /* Add spacing between image and description */
   }
-  
   .cartItem .description {
     width: 100%;
-    font-size: 30px;
+    font-size: 25px;
   }
   
   .countHandler input {
@@ -41,3 +43,12 @@
     margin: 10px;
     cursor: pointer;
   }
+  .product {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
